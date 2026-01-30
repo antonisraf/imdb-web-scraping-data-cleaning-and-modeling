@@ -223,7 +223,7 @@ ggplot(final_data2, aes(x = Rating)) +
        x = "Rating", y = "Πλήθος Τίτλων")
 ```
 
-![](1_Data-clean-and-transform--2-_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](eda_and_cleaning_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 #Η κατανομή παρουσιάζει ξεκάθαρη αριστερή ασυμμετρία 
@@ -239,7 +239,7 @@ ggplot(final_data2, aes(x = Era, y = Rating, fill = Era)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-![](1_Data-clean-and-transform--2-_files/figure-gfm/unnamed-chunk-1-2.png)<!-- -->
+![](eda_and_cleaning_files/figure-gfm/unnamed-chunk-1-2.png)<!-- -->
 
 ``` r
 #Το Streaming είναι η μόνη εποχή που έπεσε κάτω από το 7 σπάζοντας τη σταθερότητα των προηγούμενων 
@@ -254,7 +254,7 @@ ggplot(final_data2, aes(x = Genre_1)) +
        x = "Είδος", y = "Πλήθος")
 ```
 
-![](1_Data-clean-and-transform--2-_files/figure-gfm/unnamed-chunk-1-3.png)<!-- -->
+![](eda_and_cleaning_files/figure-gfm/unnamed-chunk-1-3.png)<!-- -->
 
 ``` r
 # Τα είδη Drama, Action και Comedy κυριαρχούν
@@ -302,8 +302,9 @@ ggplot(grid_data, aes(x = x, y = y, fill = Type)) +
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](1_Data-clean-and-transform--2-_files/figure-gfm/unnamed-chunk-1-4.png)<!-- -->
+![](eda_and_cleaning_files/figure-gfm/unnamed-chunk-1-4.png)<!-- -->
 
 ``` r
 #Μας βοηθά να καταλάβουμε την κατανομή της μεταβλητή Is_Series που είναι factor.Στην συγκεκριμένη περίπτωση οι ταινίες είναι περισσότερες
 ```
+
