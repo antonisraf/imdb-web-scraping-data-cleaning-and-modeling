@@ -1,0 +1,104 @@
+---
+title: "Data Clean and Transform"
+output: github_document
+---
+```{r}
+library(glmnet)
+library(jtools)
+library(caret)
+library(earth)
+library(ranger)
+
+load("1_Data clean and transform DATA.RData") # κάνω load τα δεδομένα μου
+rm(final_data,final_data1,auto_separate,clean_mixed_genres) # αφαιρώ οτι δεν μου είναι απαραίτητο
+
+
+# Generalized Linear Model (GLM) - Gaussian Family
+
+# - Εξαρτημένη μεταβλητή (Y): Rating 
+# - Ανεξάρτητες μεταβλητές (X): Genre_1, Genre_2, Popularity_Trend κλπ. (ΣΥΝΟΛΟ 10 ΑΝΕΞΑΡΤΗΤΕΣ)
+
+glm<-glm(Rating ~
+                  Genre_1+
+                  Genre_2+
+                  Popularity_Trend+
+                  count_mix+
+                  Era+
+                  Runtime_Cat+
+                  Votes_Per_Year+
+                  engagement_score+
+                  net_sentiment_ratio+
+                  Is_Series
+                  ,data = final_data2,family = gaussian)
+
+summ(glm) # summary του model 
+
+1-glm$deviance/glm$null.deviance  # υπολογισμός R squared
+
+
+
+# Elastic Net Regularized Regression
+
+fitControl <- trainControl(method = "cv", number = 10)  #Χωρίζουμε τα δεδομένα σε 10 μέρη
+# Εκπαιδεύουμε τα 9 και τεστάρουμε στο 1 επαναλαμβάνοντας την διαδικασία 10 φορές
+
+set.seed(123) #Ορίζουμε το random seed σε 123 ώστε να παίρνουμε πάντα τα ίδια ακριβώς αποτελέσματα σε κάθε εκτέλεση
+
+elastic_net_model <- train(Rating ~ Genre_1 + Genre_2 + Popularity_Trend + count_mix + 
+                             Era + Runtime_Cat + Votes_Per_Year + engagement_score + 
+                             net_sentiment_ratio + Is_Series,
+                           data = final_data2,
+                           method = "glmnet",
+                           trControl = fitControl,
+                           tuneLength = 10) #train στις ίδιες μεταβλητές με πρίν
+
+print(elastic_net_model) # Μας δείχνει την ακρίβεια (RMSE, Rsquared) για κάθε δοκιμή που έκανε.
+print(elastic_net_model$bestTune) #Εμφάνιση των Βέλτιστων Παραμέτρων alpha , lambda
+coef(elastic_net_model$finalModel, elastic_net_model$bestTune$lambda) #Εξαγωγή των Τελικών Συντελεστών
+
+
+
+# Multivariate Adaptive Regression Splines(MARS)
+
+fitControl2 <- trainControl(method = "cv", number = 10)#Χωρίζουμε τα δεδομένα σε 10 μέρη
+# Εκπαιδεύουμε τα 9 και τεστάρουμε στο 1 επαναλαμβάνοντας την διαδικασία 10 φορές
+
+set.seed(123) #Ορίζουμε το random seed σε 123 ώστε να παίρνουμε πάντα τα ίδια ακριβώς αποτελέσματα σε κάθε εκτέλεση
+
+
+mars_model <- train(Rating ~ Genre_1 + Genre_2 + Popularity_Trend + count_mix + 
+                      Era + Runtime_Cat + Votes_Per_Year + engagement_score + 
+                      net_sentiment_ratio + Is_Series,
+                    data = final_data2,
+                    method = "earth",
+                    trControl = fitControl2,
+                    tuneLength = 10) #train στις ίδιες μεταβλητές με πρίν
+
+print(mars_model) #Εμφάνιση των Βέλτιστων Παραμέτρων
+summary(mars_model$finalModel) #Hinge Functions
+
+importance_mars <- varImp(mars_model, scale = FALSE) #Υπολογισμός Σημαντικότητας Μεταβλητών
+
+
+#Random Forest (Μέθοδος Ranger)
+
+fitControl3 <- trainControl(method = "cv", number = 5) #Εδώ άλλαξα σε 5-fold (αντί για 10) ιατί το rf ήταν βαρύ
+
+set.seed(123) #Ορίζουμε το random seed σε 123 ώστε να παίρνουμε πάντα τα ίδια ακριβώς αποτελέσματα σε κάθε εκτέλεση
+
+
+
+rf_model <- train(Rating ~ Genre_1 + Genre_2 + Popularity_Trend + count_mix + 
+                    Era + Runtime_Cat + Votes_Per_Year + engagement_score + 
+                    net_sentiment_ratio + Is_Series,
+                  data = final_data2,
+                  method = "ranger",
+                  trControl = fitControl3,
+                  tuneLength = 5,
+                  importance = 'impurity') #train στις ίδιες μεταβλητές με πρίν
+
+print(rf_model) #Εμφάνιση Αποτελεσμάτων
+
+varImp(rf_model, scale = FALSE) #Σημαντικότητα Μεταβλητών
+```
+
